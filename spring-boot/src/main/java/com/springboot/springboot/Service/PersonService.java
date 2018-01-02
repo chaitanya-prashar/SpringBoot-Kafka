@@ -2,18 +2,18 @@ package com.springboot.springboot.Service;
 
 
 import com.springboot.springboot.model.Person;
-import org.apache.kafka.clients.producer.Callback;
+import jdk.nashorn.internal.codegen.CompilerConstants;
+import org.apache.kafka.clients.producer.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.kafka.core.KafkaOperations.ProducerCallback;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.text.DateFormat;
@@ -27,6 +27,8 @@ import java.util.ArrayList;
  */
 
 import java.util.List;
+
+import static javafx.scene.input.KeyCode.T;
 
 @Service
 public class PersonService {
@@ -45,13 +47,23 @@ public class PersonService {
 
     @Autowired
     private KafkaTemplate<String, Person> kafkaTemplate;
+    private DefaultKafkaProducerFactory<String, Person> kafkaDefault;
 
     @Value("${kafka.topic}")
     String kafkaTopic = "babelTopic";
 
     public void send(Person person) {
         System.out.println("sending data=" + person);
-        kafkaTemplate.send(kafkaTopic, person);
+        kafkaTemplate.send(new ProducerRecord<String, Person>(kafkaTopic,person));
+
+    /*  kafkaDefault.createProducer().send(new ProducerRecord<String, Person>(kafkaTopic, person), new Callback() {
+          @Override
+          public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+              System.out.println(recordMetadata);
+          }
+      });
+
+      */
     }
 
 }
